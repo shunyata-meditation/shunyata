@@ -1,4 +1,4 @@
-FROM node:22-alpine AS build
+FROM node:latest AS build
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:22-alpine AS runtime
+FROM node:latest AS runtime
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
