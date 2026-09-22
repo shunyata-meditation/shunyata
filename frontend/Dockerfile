@@ -10,6 +10,9 @@ RUN npm run build
 
 FROM node:latest AS runtime
 
+ENV NODE_ENV=production \
+    HOST=127.0.0.1 \
+    PORT=3000
 
 WORKDIR /app
 
