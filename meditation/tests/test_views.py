@@ -212,6 +212,36 @@ class UserRegistrationViewTest(APITestCase):
             "password_confirm": "SecurePass123!",
         }
 
+    @override_settings(
+        STORAGES={
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            },
+        }
+    )
+    def test_browsable_api_shows_registration_inputs(self):
+        response = self.client.get(reverse("register"), HTTP_ACCEPT="text/html")
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        html = response.content.decode()
+        for field in self.registration_data:
+            self.assertRegex(html, rf'<input\b[^>]*name="{field}"')
+        for field in ("password", "password_confirm"):
+            self.assertRegex(
+                html, rf'<input\b(?=[^>]*name="{field}")(?=[^>]*type="password")[^>]*>'
+            )
+
+    def test_register_user_from_html_form(self):
+        response = self.client.post(
+            reverse("register"), self.registration_data, format="multipart"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(username="newuser")
+        self.assertTrue(user.check_password(self.registration_data["password"]))
+        self.assertFalse(user.is_active)
+        self.assertEqual(len(mail.outbox), 1)
+
     def test_register_user_success(self):
         url = reverse("register")
         response = self.client.post(url, self.registration_data, format="json")
