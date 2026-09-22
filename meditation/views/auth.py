@@ -1,5 +1,4 @@
 import logging
-from typing import ClassVar
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -42,22 +41,20 @@ def _send_verification_email(user: User) -> None:
         subject=VERIFICATION_EMAIL_SUBJECT,
         message=message,
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],  # type: ignore
+        recipient_list=[user.email],
         fail_silently=False,
     )
 
 
 class UserRegistrationView(GenericAPIView):
     serializer_class = UserRegistrationSerializer
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
-        permissions.AllowAny
-    ]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
-            user: User = serializer.save()  # type: ignore
+            user: User = serializer.save()
             logger.info(f"User created: {user.username}")
             _send_verification_email(user)
             return Response(
@@ -72,14 +69,11 @@ class UserRegistrationView(GenericAPIView):
 
 
 class VerifyEmailView(APIView):
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
-        permissions.AllowAny
-    ]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, token):
         try:
-            verification_token = EmailVerificationToken.objects.get(token=token)  # type: ignore
-
+            verification_token = EmailVerificationToken.objects.get(token=token)
             if verification_token.is_expired():
                 user = verification_token.user
                 username = user.username
