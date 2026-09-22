@@ -8,6 +8,7 @@ Backend server for the Shunyata meditation tracking app. Built with Django and D
 - **Django** 6.0.5 + Django REST Framework
 - **Database** PostgreSQL
 - **Authentication** JWT via `djangorestframework-simplejwt`
+- **Email Delivery** Resend via `django-anymail`
 - **API Docs** Swagger UI via `drf-spectacular`
 - **Package Manager** [uv](https://github.com/astral-sh/uv)
 
@@ -64,17 +65,12 @@ The server will be available at `http://localhost:8000`.
 | `DB_HOST` | PostgreSQL host | `localhost` |
 | `DB_PORT` | PostgreSQL port | `5432` |
 | `DB_SSLMODE` | PostgreSQL SSL mode (`prefer` for local, `require` for hosted DBs like Neon) | `prefer` |
-| `EMAIL_BACKEND` | Django email backend | `smtp.EmailBackend` |
-| `EMAIL_HOST` | SMTP host | `smtp.gmail.com` |
-| `EMAIL_PORT` | SMTP port | `587` |
-| `EMAIL_HOST_USER` | SMTP username | `""` |
-| `EMAIL_HOST_PASSWORD` | SMTP password | `""` |
-| `DEFAULT_FROM_EMAIL` | Sender address | `EMAIL_HOST_USER` |
-| `VERIFICATION_EMAIL_EXPIRY_HOURS` | Email token TTL in hours | `24` |
+| `RESEND_API_KEY` | Resend API key used by `django-anymail` | `""` |
+| `VERIFICATION_EMAIL_EXPIRY_HOURS` | Email verification token TTL in hours | `24` |
 | `PASSWORD_RESET_TIMEOUT` | Password reset token TTL in seconds | `3600` |
-| `FRONTEND_URL` | Base URL for verification links | `http://localhost:3000` |
+| `FRONTEND_URL` | Base URL for verification and reset links | `http://localhost:3000` |
 
-> For development, set `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` to print emails to the terminal instead of sending them.
+> The app now sends mail through Resend using the `anymail.backends.resend.EmailBackend` backend and the `Shunyata <onboarding@resend.dev>` sender address. For local-only development, override the backend to Django's console backend in a local settings file or test setup instead of using SMTP env vars.
 
 ## API Reference
 
