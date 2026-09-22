@@ -225,6 +225,65 @@ test('responsive journal and form remain accessible without overflow', async ({
   )
 })
 
+test('statistics show completed progress, streaks, and persistent goals', async ({
+  page,
+  request,
+}) => {
+  await signIn(page)
+  const localNoonIso = (daysAgo: number) => {
+    const date = new Date()
+    date.setDate(date.getDate() - daysAgo)
+    date.setHours(12, 0, 0, 0)
+    return date.toISOString()
+  }
+  for (const [index, entry] of [
+    { daysAgo: 1, duration: '00:15:00', completed: true },
+    { daysAgo: 0, duration: '00:10:00', completed: true },
+    { daysAgo: 0, duration: '00:30:00', completed: false },
+  ].entries()) {
+    await request.post('http://127.0.0.1:8100/api/meditations/sessions/', {
+      headers: { Authorization: 'Bearer access-river' },
+      data: {
+        meditation_type: 1,
+        start_time: localNoonIso(entry.daysAgo),
+        end_time: localNoonIso(entry.daysAgo),
+        duration: entry.duration,
+        completed: entry.completed,
+        notes: `Statistics fixture ${index}`,
+      },
+    })
+  }
+  await page.reload()
+  await page.getByRole('link', { name: 'Statistics' }).click()
+  await expect(page.getByText('25', { exact: true })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { name: 'Set a gentle goal' }),
+  ).toBeVisible()
+  await page.getByLabel('Weekly minutes').fill('30')
+  await page.getByRole('button', { name: 'Save goal' }).click()
+  await expect(page.getByRole('progressbar')).toHaveAttribute(
+    'aria-valuenow',
+    '25',
+  )
+  await expect(page.getByText('83%', { exact: true })).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('25 of 30 minutes')).toBeVisible()
+  await page.getByRole('button', { name: 'Edit goal' }).click()
+  await page.getByLabel('Weekly minutes').fill('20')
+  await page.getByRole('button', { name: 'Save goal' }).click()
+  await expect(page.getByText('125%', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Remove goal' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Set a gentle goal' }),
+  ).toBeVisible()
+  await page.setViewportSize({ width: 390, height: 844 })
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true)
+})
+
 test('invalid credentials show an error and cross-site login requests are rejected', async ({
   page,
   request,

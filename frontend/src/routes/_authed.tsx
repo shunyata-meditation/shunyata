@@ -79,6 +79,13 @@ function AppContent() {
           >
             Log a session
           </Link>
+          <Link
+            to="/statistics"
+            className="nav-link"
+            activeProps={{ className: 'nav-link active' }}
+          >
+            Statistics
+          </Link>
           <span className="nav-divider" />
           <button
             className="sign-out"

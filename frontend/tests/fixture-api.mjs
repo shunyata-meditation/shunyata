@@ -4,6 +4,7 @@ let sessions = []
 let nextId = 1
 let verified = false
 let options = {}
+let goals = {}
 const types = [
   { id: 1, name: 'Mindfulness' },
   { id: 2, name: 'Body Scan' },
@@ -23,6 +24,7 @@ createServer(async (req, res) => {
     nextId = 1
     verified = false
     options = {}
+    goals = {}
     return send(200, {})
   }
   if (path === '/__options') {
@@ -68,6 +70,25 @@ createServer(async (req, res) => {
       detail: 'Authentication credentials were not provided.',
     })
   const user = req.headers.authorization.replace('Bearer access-', '')
+  if (path === '/api/meditations/goal/') {
+    if (options.goalFails) return send(503, { detail: 'Unavailable' })
+    if (req.method === 'GET')
+      return send(200, { weekly_minutes: goals[user] ?? null })
+    if (req.method === 'DELETE') {
+      delete goals[user]
+      return send(204, null)
+    }
+    if (
+      !Number.isInteger(body.weekly_minutes) ||
+      body.weekly_minutes < 1 ||
+      body.weekly_minutes > 10080
+    )
+      return send(400, {
+        weekly_minutes: ['Enter a value from 1 to 10080.'],
+      })
+    goals[user] = body.weekly_minutes
+    return send(200, { weekly_minutes: goals[user] })
+  }
   if (path === '/api/meditations/types/')
     return send(200, options.noTypes ? [] : types)
   if (path === '/api/meditations/sessions/') {

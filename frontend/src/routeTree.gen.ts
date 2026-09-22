@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedStatisticsRouteImport } from './routes/_authed/statistics'
 import { Route as AuthedTimerRouteImport } from './routes/_authed/timer'
 import { Route as AuthedSessionsNewRouteImport } from './routes/_authed/sessions.new'
 import { Route as AuthedSessionsSessionIdEditRouteImport } from './routes/_authed/sessions.$sessionId.edit'
@@ -35,6 +36,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedStatisticsRoute = AuthedStatisticsRouteImport.update({
+  id: '/statistics',
+  path: '/statistics',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedTimerRoute = AuthedTimerRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/statistics': typeof AuthedStatisticsRoute
   '/timer': typeof AuthedTimerRoute
   '/sessions/new': typeof AuthedSessionsNewRoute
   '/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/statistics': typeof AuthedStatisticsRoute
   '/timer': typeof AuthedTimerRoute
   '/': typeof AuthedIndexRoute
   '/sessions/new': typeof AuthedSessionsNewRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_authed/statistics': typeof AuthedStatisticsRoute
   '/_authed/timer': typeof AuthedTimerRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/sessions/new': typeof AuthedSessionsNewRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/statistics'
     | '/timer'
     | '/sessions/new'
     | '/sessions/$sessionId/edit'
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/register'
+    | '/statistics'
     | '/timer'
     | '/'
     | '/sessions/new'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/login'
     | '/register'
+    | '/_authed/statistics'
     | '/_authed/timer'
     | '/_authed/'
     | '/_authed/sessions/new'
@@ -156,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/statistics': {
+      id: '/_authed/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof AuthedStatisticsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/timer': {
       id: '/_authed/timer'
       path: '/timer'
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedStatisticsRoute: typeof AuthedStatisticsRoute
   AuthedTimerRoute: typeof AuthedTimerRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedSessionsNewRoute: typeof AuthedSessionsNewRoute
@@ -195,6 +215,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedStatisticsRoute: AuthedStatisticsRoute,
   AuthedTimerRoute: AuthedTimerRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedSessionsNewRoute: AuthedSessionsNewRoute,

@@ -1,5 +1,10 @@
 import { queryOptions } from '@tanstack/react-query'
-import { getSession, listSessions, listTypes } from '../server/functions'
+import {
+  getPracticeGoal,
+  getSession,
+  listSessions,
+  listTypes,
+} from '../server/functions'
 import { unwrap } from './contracts'
 
 export const sessionsQuery = () =>
@@ -13,6 +18,12 @@ export const typesQuery = () =>
     queryKey: ['types'],
     queryFn: async () => unwrap(await listTypes()),
     staleTime: 300_000,
+  })
+export const practiceGoalQuery = () =>
+  queryOptions({
+    queryKey: ['practice-goal'],
+    queryFn: async () => unwrap(await getPracticeGoal()),
+    staleTime: 30_000,
   })
 export const sessionQuery = (id: number) =>
   queryOptions({

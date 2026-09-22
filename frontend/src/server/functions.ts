@@ -5,6 +5,7 @@ import type { Tokens } from './transport'
 import {
   idSchema,
   loginSchema,
+  practiceGoalSchema,
   registerSchema,
   sessionSchema,
   tokenSchema,
@@ -15,6 +16,8 @@ import type {
   SessionInput,
   MeditationSession,
   MeditationType,
+  PracticeGoal,
+  PracticeGoalInput,
 } from '../lib/contracts'
 import { sessionPayload } from '../lib/session-values'
 import { ApiError } from '../lib/contracts'
@@ -83,6 +86,33 @@ export const listTypes = createServerFn({ method: 'GET' }).handler(() =>
       '/meditations/types/',
     ),
   ),
+)
+export const getPracticeGoal = createServerFn({ method: 'GET' }).handler(() =>
+  resultOf(async () =>
+    api().authenticated<PracticeGoal>(await appSession(), '/meditations/goal/'),
+  ),
+)
+export const savePracticeGoal = createServerFn({ method: 'POST' })
+  .validator((data: PracticeGoalInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () =>
+      api().authenticated<PracticeGoal>(
+        await appSession(),
+        '/meditations/goal/',
+        {
+          method: 'PUT',
+          body: JSON.stringify(practiceGoalSchema.parse(data)),
+        },
+      ),
+    ),
+  )
+export const deletePracticeGoal = createServerFn({ method: 'POST' }).handler(
+  () =>
+    resultOf(async () =>
+      api().authenticated<null>(await appSession(), '/meditations/goal/', {
+        method: 'DELETE',
+      }),
+    ),
 )
 export const getSession = createServerFn({ method: 'GET' })
   .validator((data: number) => data)

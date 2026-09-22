@@ -45,9 +45,17 @@ export const sessionSchema = z
     },
   )
 export const idSchema = z.number().int().positive()
+export const practiceGoalSchema = z.object({
+  weekly_minutes: z
+    .number()
+    .int('Enter a whole number of minutes.')
+    .min(1, 'Your goal must be at least 1 minute.')
+    .max(10_080, 'Your goal cannot exceed 10,080 minutes.'),
+})
 export const tokenSchema = z
   .string()
   .regex(/^[a-zA-Z0-9_-]{1,512}$/, 'This verification link is invalid.')
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type SessionInput = z.infer<typeof sessionSchema>
+export type PracticeGoalInput = z.infer<typeof practiceGoalSchema>

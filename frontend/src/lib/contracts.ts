@@ -1,4 +1,9 @@
-export type { LoginInput, RegisterInput, SessionInput } from './validation'
+export type {
+  LoginInput,
+  PracticeGoalInput,
+  RegisterInput,
+  SessionInput,
+} from './validation'
 
 export interface MeditationType {
   id: number
@@ -14,6 +19,9 @@ export interface MeditationSession {
   duration: string
   completed: boolean
   notes: string
+}
+export interface PracticeGoal {
+  weekly_minutes: number | null
 }
 export interface ApiProblem {
   status: number

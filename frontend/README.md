@@ -86,8 +86,8 @@ Deploy the full `.output/` directory to a Node-compatible server. Set `BACKEND_A
 ## Pending features
 
 - [x] Countdown timer, pause/resume, and optional completion bell.
+- [x] Progress charts, streaks, and goals.
 - [ ] Open-ended stopwatch mode and interval bells.
-- [ ] Progress charts, streaks, and goals.
 - [ ] Password reset and verification-email resend (backend endpoints needed).
 - [ ] Profile/account settings (backend endpoints needed).
 - [ ] Server-side logout/token revocation (backend support needed).
