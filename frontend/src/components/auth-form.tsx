@@ -4,7 +4,6 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { login, register } from '../server/functions'
 import type { ApiProblem } from '../lib/contracts'
-import branchArt from '../assets/branch.svg'
 import { Brand, FieldError, Footer, FormProblem } from './ui'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
@@ -83,7 +82,6 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
             <br />
             And make a little room for what matters.
           </p>
-          <img className="branch" src={branchArt} alt="" aria-hidden="true" />
           <span className="intro-footnote">
             No perfect practice. Just your own.
           </span>

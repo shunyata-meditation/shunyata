@@ -6,7 +6,6 @@ import { formatDuration } from '../../lib/session-values'
 import { unwrap } from '../../lib/contracts'
 import type { MeditationSession } from '../../lib/contracts'
 import { deleteSession } from '../../server/functions'
-import branchArt from '../../assets/branch.svg'
 import { ErrorNotice, Loading, LogoMark } from '../../components/ui'
 import { meditationEmoji } from '../../lib/meditation-emoji'
 
@@ -46,7 +45,6 @@ function Journal() {
         </div>
         <div className="hero-art">
           <div className="sun-disc" />
-          <img className="branch" src={branchArt} alt="" aria-hidden="true" />
           <span>Be here, just as you are.</span>
         </div>
       </section>
