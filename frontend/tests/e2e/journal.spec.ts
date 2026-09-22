@@ -43,6 +43,8 @@ test('registration, explicit verification, and invalid links', async ({
   await expect(
     page.getByRole('heading', { name: 'Check your inbox.' }),
   ).toBeVisible()
+  await page.getByRole('button', { name: 'Resend verification email' }).click()
+  await expect(page.getByText('another link is on its way')).toBeVisible()
   await page.goto('/api/auth/verify-email/valid-token')
   await page.reload() // Navigation and reload must not consume the single-use token.
   await page.getByRole('button', { name: 'Verify email' }).click()
@@ -52,7 +54,7 @@ test('registration, explicit verification, and invalid links', async ({
   await page.goto('/api/auth/verify-email/expired-token')
   await page.getByRole('button', { name: 'Verify email' }).click()
   await expect(
-    page.getByText('Verification token has expired. Please register again.'),
+    page.getByText('Verification token has expired. Please request another.'),
   ).toBeVisible()
 })
 
@@ -282,6 +284,66 @@ test('statistics show completed progress, streaks, and persistent goals', async 
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true)
+})
+
+test('account recovery and profile password change complete securely', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/login')
+  await page.getByRole('link', { name: 'Forgot your password?' }).click()
+  await page.getByLabel('Email address').fill('river@example.test')
+  await page.getByRole('button', { name: 'Send reset link' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Check your inbox.' }),
+  ).toBeVisible()
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true)
+
+  await page.goto('/reset-password/fixture-user/valid-reset')
+  await page.getByLabel('New password', { exact: true }).fill('reset-password')
+  await page.getByLabel('Confirm new password').fill('reset-password')
+  await page.getByRole('button', { name: 'Set new password' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Your password is ready.' }),
+  ).toBeVisible()
+  await page.getByRole('link', { name: 'Continue to sign in' }).click()
+  await page.getByLabel('Username', { exact: true }).fill('river')
+  await page.getByLabel('Password', { exact: true }).fill('reset-password')
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page).toHaveURL(/\/$/)
+
+  await page.getByRole('link', { name: 'Profile' }).click()
+  await expect(page.getByText('river@example.test')).toBeVisible()
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true)
+  await page.getByLabel('Current password').fill('wrong-password')
+  await page
+    .getByLabel('New password', { exact: true })
+    .fill('profile-password')
+  await page.getByLabel('Confirm new password').fill('profile-password')
+  await page.getByRole('button', { name: 'Change password' }).click()
+  await expect(
+    page.getByText('Your current password is incorrect.'),
+  ).toBeVisible()
+  await page.getByLabel('Current password').fill('reset-password')
+  await page.getByRole('button', { name: 'Change password' }).click()
+  await expect(page).toHaveURL(/\/login$/)
+  await expect(
+    page.getByText(
+      'Your password has been changed. Sign in again on this device.',
+    ),
+  ).toBeVisible()
+  await page.getByLabel('Username', { exact: true }).fill('river')
+  await page.getByLabel('Password', { exact: true }).fill('profile-password')
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page).toHaveURL(/\/$/)
 })
 
 test('invalid credentials show an error and cross-site login requests are rejected', async ({

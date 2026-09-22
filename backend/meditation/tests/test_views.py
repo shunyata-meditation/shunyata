@@ -577,9 +577,21 @@ class AccountRecoveryViewTest(APITestCase):
         token.refresh_from_db()
         self.assertIn(token.token, mail.outbox[0].body)
 
+        for _ in range(5):
+            self.client.post(url, {"email": self.inactive.email}, format="json")
+        self.assertEqual(len(mail.outbox), 5)
+        self.assertTrue(all(token.token in message.body for message in mail.outbox))
+        self.assertEqual(
+            RecoveryEmailEvent.objects.filter(
+                user=self.inactive,
+                kind=RecoveryEmailEvent.Kind.VERIFICATION,
+            ).count(),
+            5,
+        )
+
         self.client.post(url, {"email": self.active.email}, format="json")
         self.client.post(url, {"email": "unknown@example.com"}, format="json")
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(len(mail.outbox), 5)
 
     def test_profile_and_password_change(self):
         self.client.force_authenticate(user=self.active)

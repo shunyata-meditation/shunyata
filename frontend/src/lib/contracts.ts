@@ -1,7 +1,11 @@
 export type {
+  AccountEmailInput,
   LoginInput,
+  PasswordChangeInput,
+  PasswordPairInput,
   PracticeGoalInput,
   RegisterInput,
+  ResetLinkInput,
   SessionInput,
 } from './validation'
 
@@ -22,6 +26,10 @@ export interface MeditationSession {
 }
 export interface PracticeGoal {
   weekly_minutes: number | null
+}
+export interface Profile {
+  username: string
+  email: string
 }
 export interface ApiProblem {
   status: number

@@ -71,8 +71,8 @@ function Verification() {
         {problem?.status === 400 && (
           <p>
             This link may have expired or already been used.{' '}
-            <Link to="/login">Try signing in</Link>, or{' '}
-            <Link to="/register">register again</Link> if it expired.
+            <Link to="/resend-verification">Request another email</Link>, or{' '}
+            <Link to="/login">return to sign in</Link>.
           </p>
         )}
       </main>

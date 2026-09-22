@@ -3,21 +3,30 @@ import { appSession, api } from './session'
 import { resultOf } from './transport'
 import type { Tokens } from './transport'
 import {
+  accountEmailSchema,
   idSchema,
   loginSchema,
+  passwordChangeSchema,
+  passwordPairSchema,
   practiceGoalSchema,
   registerSchema,
+  resetLinkSchema,
   sessionSchema,
   tokenSchema,
 } from '../lib/validation'
 import type {
+  AccountEmailInput,
   LoginInput,
   RegisterInput,
   SessionInput,
   MeditationSession,
   MeditationType,
+  PasswordChangeInput,
+  PasswordPairInput,
   PracticeGoal,
   PracticeGoalInput,
+  Profile,
+  ResetLinkInput,
 } from '../lib/contracts'
 import { sessionPayload } from '../lib/session-values'
 import { ApiError } from '../lib/contracts'
@@ -68,9 +77,75 @@ export const verifyEmail = createServerFn({ method: 'POST' })
       )
     }),
   )
+export const resendVerification = createServerFn({ method: 'POST' })
+  .validator((data: AccountEmailInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () =>
+      api().request<{ message: string }>('/auth/resend-verification/', {
+        method: 'POST',
+        body: JSON.stringify(accountEmailSchema.parse(data)),
+      }),
+    ),
+  )
+export const requestPasswordReset = createServerFn({ method: 'POST' })
+  .validator((data: AccountEmailInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () =>
+      api().request<{ message: string }>('/auth/password-reset/', {
+        method: 'POST',
+        body: JSON.stringify(accountEmailSchema.parse(data)),
+      }),
+    ),
+  )
+export const validatePasswordReset = createServerFn({ method: 'GET' })
+  .validator((data: ResetLinkInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () => {
+      const link = resetLinkSchema.parse(data)
+      return api().request<{ valid: true }>(
+        `/auth/password-reset/${encodeURIComponent(link.uid)}/${encodeURIComponent(link.token)}/`,
+      )
+    }),
+  )
+export const resetPassword = createServerFn({ method: 'POST' })
+  .validator((data: ResetLinkInput & PasswordPairInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () => {
+      const link = resetLinkSchema.parse(data)
+      const values = passwordPairSchema.parse(data)
+      const response = await api().request<{ message: string }>(
+        `/auth/password-reset/${encodeURIComponent(link.uid)}/${encodeURIComponent(link.token)}/`,
+        { method: 'POST', body: JSON.stringify(values) },
+      )
+      await (await appSession()).clear()
+      return response
+    }),
+  )
 export const logout = createServerFn({ method: 'POST' }).handler(async () => {
   await (await appSession()).clear()
 })
+export const getProfile = createServerFn({ method: 'GET' }).handler(() =>
+  resultOf(async () =>
+    api().authenticated<Profile>(await appSession(), '/auth/profile/'),
+  ),
+)
+export const changePassword = createServerFn({ method: 'POST' })
+  .validator((data: PasswordChangeInput) => data)
+  .handler(({ data }) =>
+    resultOf(async () => {
+      const session = await appSession()
+      const response = await api().authenticated<{ message: string }>(
+        session,
+        '/auth/password-change/',
+        {
+          method: 'POST',
+          body: JSON.stringify(passwordChangeSchema.parse(data)),
+        },
+      )
+      await session.clear()
+      return response
+    }),
+  )
 export const listSessions = createServerFn({ method: 'GET' }).handler(() =>
   resultOf(async () =>
     api().authenticated<MeditationSession[]>(

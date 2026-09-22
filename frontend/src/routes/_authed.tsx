@@ -86,6 +86,13 @@ function AppContent() {
           >
             Statistics
           </Link>
+          <Link
+            to="/profile"
+            className="nav-link"
+            activeProps={{ className: 'nav-link active' }}
+          >
+            Profile
+          </Link>
           <span className="nav-divider" />
           <button
             className="sign-out"

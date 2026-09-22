@@ -1530,6 +1530,105 @@ input[type='checkbox'] {
 .remove-goal {
   color: var(--error);
 }
+.auth-help-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 17px;
+  font-size: 11px;
+  color: var(--sage);
+}
+.auth-resend {
+  width: 100%;
+  margin-top: 12px;
+}
+.account-recovery-layout {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 62px 0 72px;
+}
+.account-recovery-card {
+  width: min(100%, 520px);
+  padding: 43px;
+  text-align: center;
+}
+.account-recovery-card .logo-mark {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 20px;
+}
+.account-recovery-card .eyebrow {
+  margin-bottom: 11px;
+}
+.account-recovery-card h1 {
+  font-size: 39px;
+  margin-bottom: 16px;
+}
+.account-recovery-card > p:not(.eyebrow) {
+  font-size: 13px;
+  margin-bottom: 26px;
+}
+.account-recovery-card form {
+  text-align: left;
+}
+.recovery-back-link {
+  margin: 19px 0 0;
+}
+.reset-password-card {
+  width: min(100%, 560px);
+}
+.reset-password-card form {
+  text-align: left;
+  margin-top: 27px;
+}
+.profile-page {
+  padding: 49px 0 72px;
+}
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
+  gap: 18px;
+  align-items: start;
+}
+.profile-details,
+.profile-password {
+  padding: 34px;
+}
+.profile-details .eyebrow,
+.profile-password .eyebrow {
+  margin-bottom: 9px;
+}
+.profile-details h2,
+.profile-password h2 {
+  font-size: 28px;
+}
+.profile-details dl {
+  margin: 28px 0 0;
+}
+.profile-details dl > div {
+  padding: 17px 0;
+  border-top: 1px solid var(--line);
+}
+.profile-details dt {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.profile-details dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  font-family: Georgia, serif;
+  font-size: 18px;
+}
+.profile-password > p:not(.eyebrow) {
+  margin: 10px 0 25px;
+  font-size: 12px;
+}
+.profile-password form {
+  max-width: 440px;
+}
 @media (max-width: 900px) {
   .statistics-layout {
     grid-template-columns: minmax(0, 1fr) 240px;
@@ -1540,6 +1639,9 @@ input[type='checkbox'] {
   }
   .practice-heatmap {
     gap: 4px;
+  }
+  .profile-layout {
+    grid-template-columns: 230px minmax(0, 1fr);
   }
 }
 @media (max-width: 640px) {
@@ -1651,5 +1753,29 @@ input[type='checkbox'] {
     column-gap: 17px;
     row-gap: 0;
     flex-wrap: wrap;
+  }
+  .auth-help-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .account-recovery-layout {
+    padding: 38px 0 46px;
+  }
+  .account-recovery-card {
+    padding: 32px 23px;
+  }
+  .account-recovery-card h1 {
+    font-size: 34px;
+  }
+  .profile-page {
+    padding: 36px 0 48px;
+  }
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+  .profile-details,
+  .profile-password {
+    padding: 27px 23px;
   }
 }

@@ -1,12 +1,18 @@
 import { Link, useHydrated, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { login, register } from '../server/functions'
+import { login, register, resendVerification } from '../server/functions'
 import type { ApiProblem } from '../lib/contracts'
 import { Brand, FieldError, Footer, FormProblem } from './ui'
 
-export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
+export function AuthForm({
+  mode,
+  notice,
+}: {
+  mode: 'login' | 'register'
+  notice?: string
+}) {
   const isRegister = mode === 'register'
   const hydrated = useHydrated()
   const router = useRouter()
@@ -14,6 +20,21 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const [problem, setProblem] = useState<ApiProblem | null>(null)
   const [busy, setBusy] = useState(false)
   const [registered, setRegistered] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState('')
+  const [resent, setResent] = useState(false)
+  const [displayNotice, setDisplayNotice] = useState(notice)
+  useEffect(() => {
+    if (isRegister) return
+    try {
+      const message = sessionStorage.getItem('shunyata-auth-notice')
+      if (message) {
+        setDisplayNotice(message)
+        sessionStorage.removeItem('shunyata-auth-notice')
+      }
+    } catch {
+      // A confirmation notice is optional when browser storage is unavailable.
+    }
+  }, [isRegister])
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setBusy(true)
@@ -38,12 +59,33 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
         return
       }
       if (isRegister) {
+        setRegisteredEmail(String(form.get('email')))
         setRegistered(true)
         return
       }
       client.clear()
       await router.invalidate()
       await router.navigate({ to: '/' })
+    } catch {
+      setProblem({
+        status: 503,
+        message: 'We could not connect. Please try again.',
+        fields: {},
+      })
+    } finally {
+      setBusy(false)
+    }
+  }
+  async function resend() {
+    setBusy(true)
+    setProblem(null)
+    setResent(false)
+    try {
+      const result = await resendVerification({
+        data: { email: registeredEmail },
+      })
+      if (result.ok) setResent(true)
+      else setProblem(result.error)
     } catch {
       setProblem({
         status: 503,
@@ -95,9 +137,24 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                 We’ve sent you a link to verify your email. Open it to finish
                 creating your account, then come back and sign in.
               </p>
+              <FormProblem problem={problem} />
+              {resent && (
+                <div className="notice" role="status">
+                  If the account still needs verification, another link is on
+                  its way.
+                </div>
+              )}
               <Link to="/login" className="button full">
                 Back to sign in <span aria-hidden="true">→</span>
               </Link>
+              <button
+                type="button"
+                className="text-button auth-resend"
+                disabled={!hydrated || busy}
+                onClick={() => void resend()}
+              >
+                {busy ? 'Sending…' : 'Resend verification email'}
+              </button>
             </>
           ) : (
             <>
@@ -110,6 +167,11 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                   ? 'Create a quiet space for your meditation journal.'
                   : 'Sign in to return to your journal.'}
               </p>
+              {displayNotice && (
+                <div className="notice" role="status">
+                  {displayNotice}
+                </div>
+              )}
               <form method="post" onSubmit={submit}>
                 <fieldset disabled={!hydrated || busy}>
                   <FormProblem problem={problem} />
@@ -157,6 +219,14 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                   {isRegister ? 'Sign in' : 'Begin your journal'}
                 </Link>
               </p>
+              {!isRegister && (
+                <div className="auth-help-links">
+                  <Link to="/forgot-password">Forgot your password?</Link>
+                  <Link to="/resend-verification">
+                    Resend verification email
+                  </Link>
+                </div>
+              )}
             </>
           )}
         </section>

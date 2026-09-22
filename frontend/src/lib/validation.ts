@@ -52,6 +52,32 @@ export const practiceGoalSchema = z.object({
     .min(1, 'Your goal must be at least 1 minute.')
     .max(10_080, 'Your goal cannot exceed 10,080 minutes.'),
 })
+export const accountEmailSchema = z.object({
+  email: z.email('Enter a valid email address.'),
+})
+export const passwordPairSchema = z
+  .object({
+    new_password: z.string().min(1, 'Enter a new password.'),
+    password_confirm: z.string().min(1, 'Confirm your new password.'),
+  })
+  .refine((data) => data.new_password === data.password_confirm, {
+    path: ['password_confirm'],
+    message: 'Your passwords do not match.',
+  })
+export const passwordChangeSchema = z
+  .object({
+    current_password: z.string().min(1, 'Enter your current password.'),
+    new_password: z.string().min(1, 'Enter a new password.'),
+    password_confirm: z.string().min(1, 'Confirm your new password.'),
+  })
+  .refine((data) => data.new_password === data.password_confirm, {
+    path: ['password_confirm'],
+    message: 'Your passwords do not match.',
+  })
+export const resetLinkSchema = z.object({
+  uid: z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/),
+  token: z.string().regex(/^[a-zA-Z0-9-]{1,128}$/),
+})
 export const tokenSchema = z
   .string()
   .regex(/^[a-zA-Z0-9_-]{1,512}$/, 'This verification link is invalid.')
@@ -59,3 +85,7 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type SessionInput = z.infer<typeof sessionSchema>
 export type PracticeGoalInput = z.infer<typeof practiceGoalSchema>
+export type AccountEmailInput = z.infer<typeof accountEmailSchema>
+export type PasswordPairInput = z.infer<typeof passwordPairSchema>
+export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>
+export type ResetLinkInput = z.infer<typeof resetLinkSchema>

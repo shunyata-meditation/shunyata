@@ -7,7 +7,13 @@ import {
   sessionPayload,
   toLocalInput,
 } from '../src/lib/session-values'
-import { registerSchema, sessionSchema } from '../src/lib/validation'
+import {
+  accountEmailSchema,
+  passwordChangeSchema,
+  passwordPairSchema,
+  registerSchema,
+  sessionSchema,
+} from '../src/lib/validation'
 
 describe('session values', () => {
   it('preserves fractional timestamps when browsers normalize zero seconds', () => {
@@ -79,5 +85,26 @@ describe('session values', () => {
     expect(result.success).toBe(false)
     if (!result.success)
       expect(result.error.issues[0].path).toEqual(['password_confirm'])
+  })
+  it('validates recovery email and matching new passwords', () => {
+    expect(
+      accountEmailSchema.safeParse({ email: 'river@example.test' }).success,
+    ).toBe(true)
+    expect(
+      accountEmailSchema.safeParse({ email: 'not-an-email' }).success,
+    ).toBe(false)
+    expect(
+      passwordPairSchema.safeParse({
+        new_password: 'new phrase',
+        password_confirm: 'different',
+      }).success,
+    ).toBe(false)
+    expect(
+      passwordChangeSchema.safeParse({
+        current_password: 'old phrase',
+        new_password: 'new phrase',
+        password_confirm: 'new phrase',
+      }).success,
+    ).toBe(true)
   })
 })

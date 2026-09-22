@@ -10,17 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ResendVerificationRouteImport } from './routes/resend-verification'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedStatisticsRouteImport } from './routes/_authed/statistics'
 import { Route as AuthedTimerRouteImport } from './routes/_authed/timer'
 import { Route as AuthedSessionsNewRouteImport } from './routes/_authed/sessions.new'
+import { Route as ResetPasswordUidTokenRouteImport } from './routes/reset-password.$uid.$token'
 import { Route as AuthedSessionsSessionIdEditRouteImport } from './routes/_authed/sessions.$sessionId.edit'
 import { Route as ApiAuthVerifyEmailTokenRouteImport } from './routes/api.auth.verify-email.$token'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -33,9 +42,19 @@ const RegisterRoute = RegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResendVerificationRoute = ResendVerificationRouteImport.update({
+  id: '/resend-verification',
+  path: '/resend-verification',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedProfileRoute = AuthedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedStatisticsRoute = AuthedStatisticsRouteImport.update({
@@ -53,6 +72,11 @@ const AuthedSessionsNewRoute = AuthedSessionsNewRouteImport.update({
   path: '/sessions/new',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ResetPasswordUidTokenRoute = ResetPasswordUidTokenRouteImport.update({
+  id: '/reset-password/$uid/$token',
+  path: '/reset-password/$uid/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedSessionsSessionIdEditRoute =
   AuthedSessionsSessionIdEditRouteImport.update({
     id: '/sessions/$sessionId/edit',
@@ -67,33 +91,45 @@ const ApiAuthVerifyEmailTokenRoute = ApiAuthVerifyEmailTokenRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/resend-verification': typeof ResendVerificationRoute
+  '/profile': typeof AuthedProfileRoute
   '/statistics': typeof AuthedStatisticsRoute
   '/timer': typeof AuthedTimerRoute
   '/sessions/new': typeof AuthedSessionsNewRoute
+  '/reset-password/$uid/$token': typeof ResetPasswordUidTokenRoute
   '/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
   '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
 export interface FileRoutesByTo {
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/resend-verification': typeof ResendVerificationRoute
+  '/profile': typeof AuthedProfileRoute
   '/statistics': typeof AuthedStatisticsRoute
   '/timer': typeof AuthedTimerRoute
   '/': typeof AuthedIndexRoute
   '/sessions/new': typeof AuthedSessionsNewRoute
+  '/reset-password/$uid/$token': typeof ResetPasswordUidTokenRoute
   '/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
   '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/resend-verification': typeof ResendVerificationRoute
+  '/_authed/profile': typeof AuthedProfileRoute
   '/_authed/statistics': typeof AuthedStatisticsRoute
   '/_authed/timer': typeof AuthedTimerRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/sessions/new': typeof AuthedSessionsNewRoute
+  '/reset-password/$uid/$token': typeof ResetPasswordUidTokenRoute
   '/_authed/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
   '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
@@ -101,40 +137,55 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/resend-verification'
+    | '/profile'
     | '/statistics'
     | '/timer'
     | '/sessions/new'
+    | '/reset-password/$uid/$token'
     | '/sessions/$sessionId/edit'
     | '/api/auth/verify-email/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/resend-verification'
+    | '/profile'
     | '/statistics'
     | '/timer'
     | '/'
     | '/sessions/new'
+    | '/reset-password/$uid/$token'
     | '/sessions/$sessionId/edit'
     | '/api/auth/verify-email/$token'
   id:
     | '__root__'
     | '/_authed'
+    | '/forgot-password'
     | '/login'
     | '/register'
+    | '/resend-verification'
+    | '/_authed/profile'
     | '/_authed/statistics'
     | '/_authed/timer'
     | '/_authed/'
     | '/_authed/sessions/new'
+    | '/reset-password/$uid/$token'
     | '/_authed/sessions/$sessionId/edit'
     | '/api/auth/verify-email/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ResendVerificationRoute: typeof ResendVerificationRoute
+  ResetPasswordUidTokenRoute: typeof ResetPasswordUidTokenRoute
   ApiAuthVerifyEmailTokenRoute: typeof ApiAuthVerifyEmailTokenRoute
 }
 
@@ -145,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -161,11 +219,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/resend-verification': {
+      id: '/resend-verification'
+      path: '/resend-verification'
+      fullPath: '/resend-verification'
+      preLoaderRoute: typeof ResendVerificationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/': {
       id: '/_authed/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/profile': {
+      id: '/_authed/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthedProfileRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/statistics': {
@@ -189,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedSessionsNewRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/reset-password/$uid/$token': {
+      id: '/reset-password/$uid/$token'
+      path: '/reset-password/$uid/$token'
+      fullPath: '/reset-password/$uid/$token'
+      preLoaderRoute: typeof ResetPasswordUidTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/sessions/$sessionId/edit': {
       id: '/_authed/sessions/$sessionId/edit'
       path: '/sessions/$sessionId/edit'
@@ -207,6 +286,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedProfileRoute: typeof AuthedProfileRoute
   AuthedStatisticsRoute: typeof AuthedStatisticsRoute
   AuthedTimerRoute: typeof AuthedTimerRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
@@ -215,6 +295,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedProfileRoute: AuthedProfileRoute,
   AuthedStatisticsRoute: AuthedStatisticsRoute,
   AuthedTimerRoute: AuthedTimerRoute,
   AuthedIndexRoute: AuthedIndexRoute,
@@ -227,8 +308,11 @@ const AuthedRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ResendVerificationRoute: ResendVerificationRoute,
+  ResetPasswordUidTokenRoute: ResetPasswordUidTokenRoute,
   ApiAuthVerifyEmailTokenRoute: ApiAuthVerifyEmailTokenRoute,
 }
 export const routeTree = rootRouteImport

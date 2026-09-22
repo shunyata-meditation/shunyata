@@ -71,6 +71,7 @@ The server will be available at `http://localhost:8000`.
 | `EMAIL_HOST_PASSWORD` | SMTP password | `""` |
 | `DEFAULT_FROM_EMAIL` | Sender address | `EMAIL_HOST_USER` |
 | `VERIFICATION_EMAIL_EXPIRY_HOURS` | Email token TTL in hours | `24` |
+| `PASSWORD_RESET_TIMEOUT` | Password reset token TTL in seconds | `3600` |
 | `FRONTEND_URL` | Base URL for verification links | `http://localhost:3000` |
 
 > For development, set `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend` to print emails to the terminal instead of sending them.
@@ -85,10 +86,17 @@ Interactive documentation is available at `/api/docs/` when the server is runnin
 |---|---|---|---|
 | `POST` | `/api/auth/register/` | Register a new user | No |
 | `GET` | `/api/auth/verify-email/<token>/` | Verify email address | No |
+| `POST` | `/api/auth/resend-verification/` | Resend a verification email | No |
+| `POST` | `/api/auth/password-reset/` | Request a password reset | No |
+| `GET`, `POST` | `/api/auth/password-reset/<uid>/<token>/` | Validate or complete a password reset | No |
 | `POST` | `/api/auth/login/` | Obtain JWT token pair | No |
 | `POST` | `/api/auth/refresh/` | Refresh access token | No |
+| `GET` | `/api/auth/profile/` | Read account details | Yes |
+| `POST` | `/api/auth/password-change/` | Change the account password | Yes |
 
-**Registration flow:** `POST /api/auth/register/` creates an inactive user and sends a verification email. The account is activated when the user clicks the link, after which they can log in.
+**Registration flow:** `POST /api/auth/register/` creates an inactive user and sends a verification email. The account is activated when the user clicks the link, after which they can log in. Expired verification links leave the account available for email resend.
+
+Recovery request responses do not reveal whether an account exists. Recovery emails are limited to five of each kind per account per rolling hour. Changing or resetting a password invalidates existing JWTs.
 
 **Auth header:** `Authorization: Bearer <access_token>`
 
