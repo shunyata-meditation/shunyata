@@ -84,6 +84,20 @@ node .output/server/index.mjs
 
 Deploy the full `.output/` directory to a Node-compatible server. Set `BACKEND_API_URL` and `SESSION_SECRET` in its environment, configure Django's `FRONTEND_URL` to the public frontend origin, and serve the frontend over HTTPS so Secure cookies work. Keep the same secret across frontend instances. Do not publicly cache authenticated pages or server-function responses. This is a server-rendered app, not a static-only deployment.
 
+### Docker
+
+Build and run the production image from the repository root:
+
+```bash
+docker build -t shunyata-frontend ./frontend
+docker run --rm -p 3000:3000 \
+  -e BACKEND_API_URL=http://backend:8000/api \
+  -e SESSION_SECRET='<at-least-32-characters>' \
+  shunyata-frontend
+```
+
+`BACKEND_API_URL` and `SESSION_SECRET` are runtime-only settings. The image runs the Nitro server on port `3000` as a non-root user.
+
 ## Pending features
 
 - [x] Countdown timer, pause/resume, and optional completion bell.
