@@ -2,7 +2,7 @@ import { ClientOnly, Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { sessionsQuery } from '../../lib/queries'
-import { formatDuration } from '../../lib/session-values'
+import { durationSeconds, formatDuration } from '../../lib/session-values'
 import { unwrap } from '../../lib/contracts'
 import type { MeditationSession } from '../../lib/contracts'
 import { deleteSession } from '../../server/functions'
@@ -20,7 +20,7 @@ function Journal() {
   return (
     <>
       <section className="journal-hero">
-        <div>
+        <div className="journal-intro">
           <p className="eyebrow">
             <span className="small-rule" /> YOUR PRACTICE, AT YOUR PACE
           </p>
@@ -43,10 +43,13 @@ function Journal() {
             </Link>
           </div>
         </div>
-        <div className="hero-art">
-          <div className="sun-disc" />
-          <span>Be here, just as you are.</span>
-        </div>
+        {query.data ? (
+          <ClientOnly fallback={<PracticeSnapshotFallback />}>
+            <PracticeSnapshot sessions={query.data} />
+          </ClientOnly>
+        ) : (
+          <PracticeSnapshotFallback />
+        )}
       </section>
       <div className="journal-layout">
         <section className="journal-list">
@@ -114,6 +117,71 @@ function Journal() {
     </>
   )
 }
+
+function PracticeSnapshot({ sessions }: { sessions: MeditationSession[] }) {
+  const now = new Date()
+  const startOfWeek = new Date(now)
+  const daysSinceMonday = (now.getDay() + 6) % 7
+  startOfWeek.setDate(now.getDate() - daysSinceMonday)
+  startOfWeek.setHours(0, 0, 0, 0)
+
+  const nextWeek = new Date(startOfWeek)
+  nextWeek.setDate(startOfWeek.getDate() + 7)
+
+  const thisWeek = sessions.filter((session) => {
+    const startedAt = new Date(session.start_time)
+    return startedAt >= startOfWeek && startedAt < nextWeek
+  })
+  const totalSeconds = thisWeek.reduce(
+    (total, session) => total + durationSeconds(session.duration),
+    0,
+  )
+  const roundedMinutes = Math.round(totalSeconds / 60)
+  const minuteValue =
+    totalSeconds > 0 && roundedMinutes === 0 ? '<1' : roundedMinutes
+  const minuteLabel = roundedMinutes === 1 ? 'minute' : 'minutes'
+
+  return (
+    <aside className="practice-snapshot" aria-label="Your practice this week">
+      <p className="eyebrow">THIS WEEK</p>
+      <div className="practice-metrics">
+        <p>
+          <strong>{thisWeek.length}</strong>
+          <span>{thisWeek.length === 1 ? 'session' : 'sessions'}</span>
+        </p>
+        <p>
+          <strong>{minuteValue}</strong>
+          <span>{minuteLabel}</span>
+        </p>
+      </div>
+      <p className="snapshot-note">
+        {thisWeek.length === 0
+          ? 'Begin whenever you’re ready.'
+          : 'A quiet rhythm, one moment at a time.'}
+      </p>
+    </aside>
+  )
+}
+
+function PracticeSnapshotFallback() {
+  return (
+    <div className="practice-snapshot snapshot-fallback" aria-hidden="true">
+      <p className="eyebrow">THIS WEEK</p>
+      <div className="practice-metrics">
+        <p>
+          <strong>—</strong>
+          <span>sessions</span>
+        </p>
+        <p>
+          <strong>—</strong>
+          <span>minutes</span>
+        </p>
+      </div>
+      <p className="snapshot-note">Your practice, at a glance.</p>
+    </div>
+  )
+}
+
 function SessionList({ sessions }: { sessions: MeditationSession[] }) {
   const client = useQueryClient()
   const dialog = useRef<HTMLDialogElement>(null)

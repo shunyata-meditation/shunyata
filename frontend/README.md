@@ -87,8 +87,6 @@ Deploy the full `.output/` directory to a Node-compatible server. Set `BACKEND_A
 
 - [x] Countdown timer, pause/resume, and optional completion bell.
 - [ ] Open-ended stopwatch mode and interval bells.
-- [ ] Reliable background notifications and cross-device timer synchronization.
-- [ ] History search, filters, and server-side pagination.
 - [ ] Progress charts, streaks, and goals.
 - [ ] Password reset and verification-email resend (backend endpoints needed).
 - [ ] Profile/account settings (backend endpoints needed).
