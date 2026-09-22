@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from rest_framework import permissions, status
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -46,11 +47,14 @@ def _send_verification_email(user: User) -> None:
     )
 
 
-class UserRegistrationView(APIView):
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.AllowAny]
+class UserRegistrationView(GenericAPIView):
+    serializer_class = UserRegistrationSerializer
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
+        permissions.AllowAny
+    ]
 
     def post(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
             user: User = serializer.save()  # type: ignore
@@ -68,7 +72,9 @@ class UserRegistrationView(APIView):
 
 
 class VerifyEmailView(APIView):
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.AllowAny]
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
+        permissions.AllowAny
+    ]
 
     def get(self, request, token):
         try:

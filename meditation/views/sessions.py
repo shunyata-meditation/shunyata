@@ -9,12 +9,16 @@ from meditation.serializers import MeditationSessionSerializer, MeditationTypeSe
 class MeditationTypeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = MeditationType.objects.all()
     serializer_class = MeditationTypeSerializer
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
+        permissions.IsAuthenticated
+    ]
 
 
 class MeditationSessionViewSet(viewsets.ModelViewSet):
     serializer_class = MeditationSessionSerializer
-    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.IsAuthenticated]
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [
+        permissions.IsAuthenticated
+    ]
 
     def get_queryset(self):  # type: ignore[return-value]
         return MeditationSession.objects.filter(user=self.request.user).select_related(
