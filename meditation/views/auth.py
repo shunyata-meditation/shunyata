@@ -1,4 +1,5 @@
 import logging
+from typing import ClassVar
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -46,7 +47,7 @@ def _send_verification_email(user: User) -> None:
 
 
 class UserRegistrationView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.AllowAny]
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -67,7 +68,7 @@ class UserRegistrationView(APIView):
 
 
 class VerifyEmailView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes: ClassVar[list[type[permissions.BasePermission]]] = [permissions.AllowAny]
 
     def get(self, request, token):
         try:

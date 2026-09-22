@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -9,7 +11,7 @@ from meditation.models import MeditationSession, MeditationType
 class MeditationTypeSerializer(serializers.ModelSerializer):
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = MeditationType
-        fields = ["id", "name"]
+        fields: ClassVar[list[str]] = ["id", "name"]
 
 
 class CaseInsensitiveTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -27,7 +29,7 @@ class CaseInsensitiveTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MeditationSessionSerializer(serializers.ModelSerializer):
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = MeditationSession
-        fields = [
+        fields: ClassVar[list[str]] = [
             "id",
             "user",
             "start_time",
@@ -38,7 +40,7 @@ class MeditationSessionSerializer(serializers.ModelSerializer):
             "completed",
             "notes",
         ]
-        read_only_fields = ["user"]
+        read_only_fields: ClassVar[list[str]] = ["user"]
 
     meditation_type_name = serializers.CharField(
         source="meditation_type.name", read_only=True
@@ -51,8 +53,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = User
-        fields = ["username", "email", "password", "password_confirm"]
-        extra_kwargs = {
+        fields: ClassVar[list[str]] = [
+            "username",
+            "email",
+            "password",
+            "password_confirm",
+        ]
+        extra_kwargs: ClassVar[dict[str, dict[str, bool]]] = {
             "email": {"required": True},
         }
 

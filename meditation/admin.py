@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from django.contrib import admin
 
 from meditation.models import EmailVerificationToken, MeditationSession, MeditationType
@@ -5,13 +7,13 @@ from meditation.models import EmailVerificationToken, MeditationSession, Meditat
 
 @admin.register(MeditationType)
 class MeditationTypeAdmin(admin.ModelAdmin):
-    list_display = ["id", "name"]
-    search_fields = ["name"]
+    list_display: ClassVar[list[str]] = ["id", "name"]
+    search_fields: ClassVar[list[str]] = ["name"]
 
 
 @admin.register(MeditationSession)
 class MeditationSessionAdmin(admin.ModelAdmin):
-    list_display = [
+    list_display: ClassVar[list[str]] = [
         "id",
         "user",
         "meditation_type",
@@ -19,14 +21,14 @@ class MeditationSessionAdmin(admin.ModelAdmin):
         "end_time",
         "duration",
     ]
-    list_filter = ["meditation_type", "start_time", "user"]
-    search_fields = ["user__username", "user__email"]
+    list_filter: ClassVar[list[str]] = ["meditation_type", "start_time", "user"]
+    search_fields: ClassVar[list[str]] = ["user__username", "user__email"]
     date_hierarchy = "start_time"
 
 
 @admin.register(EmailVerificationToken)
 class EmailVerificationTokenAdmin(admin.ModelAdmin):
-    list_display = ["id", "user", "token", "created_at", "expires_at"]
-    list_filter = ["created_at", "user"]
-    search_fields = ["user__username", "user__email"]
+    list_display: ClassVar[list[str]] = ["id", "user", "token", "created_at", "expires_at"]
+    list_filter: ClassVar[list[str]] = ["created_at", "user"]
+    search_fields: ClassVar[list[str]] = ["user__username", "user__email"]
     date_hierarchy = "created_at"

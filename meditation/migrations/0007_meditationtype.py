@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 import django.db.models.deletion
 from django.db import migrations, models
 
@@ -34,9 +36,9 @@ def migrate_types(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("meditation", "0006_emailverificationtoken")]
+    dependencies: ClassVar[list[tuple[str, str]]] = [("meditation", "0006_emailverificationtoken")]
 
-    operations = [
+    operations: ClassVar[list[migrations.operations.base.Operation]] = [
         migrations.CreateModel(
             name="MeditationType",
             fields=[
