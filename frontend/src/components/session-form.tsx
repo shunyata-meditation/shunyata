@@ -14,7 +14,8 @@ import type {
   MeditationType,
 } from '../lib/contracts'
 import { saveSession } from '../server/functions'
-import { Branch, ErrorNotice, FieldError, FormProblem, Loading } from './ui'
+import branchArt from '../assets/branch.svg'
+import { ErrorNotice, FieldError, FormProblem, Loading } from './ui'
 import { meditationEmoji } from '../lib/meditation-emoji'
 
 export function SessionPage({ id }: { id?: number }) {
@@ -35,7 +36,7 @@ export function SessionPage({ id }: { id?: number }) {
           {id === undefined ? <FormLoader /> : <ExistingSession id={id} />}
         </section>
         <aside className="form-aside">
-          <Branch />
+          <img className="branch" src={branchArt} alt="" aria-hidden="true" />
           <p>
             Long or short.
             <br />

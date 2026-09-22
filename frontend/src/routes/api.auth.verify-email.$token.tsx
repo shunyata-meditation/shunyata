@@ -1,7 +1,7 @@
 import { Link, createFileRoute, useHydrated } from '@tanstack/react-router'
 import { useState } from 'react'
 import { verifyEmail } from '../server/functions'
-import { Brand, Enso, FormProblem } from '../components/ui'
+import { Brand, FormProblem, LogoMark } from '../components/ui'
 import type { ApiProblem } from '../lib/contracts'
 
 export const Route = createFileRoute('/api/auth/verify-email/$token')({
@@ -46,7 +46,7 @@ function Verification() {
         <Brand />
       </header>
       <main className="verification paper">
-        <Enso />
+        <LogoMark />
         <p className="eyebrow">A place to begin</p>
         <h1>{done ? 'You’re all set.' : 'Welcome to your space.'}</h1>
         <p>

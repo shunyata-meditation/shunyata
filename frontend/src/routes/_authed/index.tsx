@@ -6,7 +6,8 @@ import { formatDuration } from '../../lib/session-values'
 import { unwrap } from '../../lib/contracts'
 import type { MeditationSession } from '../../lib/contracts'
 import { deleteSession } from '../../server/functions'
-import { Branch, Enso, ErrorNotice, Loading } from '../../components/ui'
+import branchArt from '../../assets/branch.svg'
+import { ErrorNotice, Loading, LogoMark } from '../../components/ui'
 import { meditationEmoji } from '../../lib/meditation-emoji'
 
 export const Route = createFileRoute('/_authed/')({
@@ -45,7 +46,7 @@ function Journal() {
         </div>
         <div className="hero-art">
           <div className="sun-disc" />
-          <Branch />
+          <img className="branch" src={branchArt} alt="" aria-hidden="true" />
           <span>Be here, just as you are.</span>
         </div>
       </section>
@@ -74,7 +75,7 @@ function Journal() {
             />
           ) : query.data.length === 0 ? (
             <div className="empty-state paper">
-              <Enso />
+              <LogoMark />
               <h3>A fresh page.</h3>
               <p>
                 Your practice doesn’t have to look a certain way.
@@ -93,7 +94,7 @@ function Journal() {
         </section>
         <aside className="journal-aside">
           <span className="eyebrow">A GENTLE REMINDER</span>
-          <Enso />
+          <LogoMark />
           <blockquote>
             “You don’t need
             <br />
@@ -153,8 +154,10 @@ function SessionList({ sessions }: { sessions: MeditationSession[] }) {
             <h3 className="date-heading">{date}</h3>
             {entries.map((session) => (
               <article className="session-entry paper" key={session.id}>
-                  <div className="session-icon" aria-hidden="true">
-                    <span className="meditation-emoji">{meditationEmoji(session.meditation_type_name)}</span>
+                <div className="session-icon" aria-hidden="true">
+                  <span className="meditation-emoji">
+                    {meditationEmoji(session.meditation_type_name)}
+                  </span>
                 </div>
                 <div className="session-body">
                   <div className="entry-heading">

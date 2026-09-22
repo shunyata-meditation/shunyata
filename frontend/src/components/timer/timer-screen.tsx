@@ -71,12 +71,36 @@ export function TimerScreen() {
           className="paper timer-practice"
           aria-label="Meditation countdown"
         >
-          <p className="eyebrow timer-type-pill"><span aria-hidden="true">{meditationEmoji(draft.typeName)}</span>{draft.typeName}</p>
+          <p className="eyebrow timer-type-pill">
+            <span aria-hidden="true">{meditationEmoji(draft.typeName)}</span>
+            {draft.typeName}
+          </p>
           <div className="timer-dial">
             <svg viewBox="0 0 240 240" aria-hidden="true">
-              <defs><linearGradient id="timer-progress-ink" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#a6b28a" /><stop offset="100%" stopColor="#536d4e" /></linearGradient></defs>
+              <defs>
+                <linearGradient
+                  id="timer-progress-ink"
+                  x1="0"
+                  y1="0"
+                  x2="1"
+                  y2="1"
+                >
+                  <stop offset="0%" stopColor="#a6b28a" />
+                  <stop offset="100%" stopColor="#536d4e" />
+                </linearGradient>
+              </defs>
               <circle cx="120" cy="120" r="95" className="timer-orbit" />
-              {Array.from({ length: 12 }, (_, index) => <line key={index} x1="120" y1="2" x2="120" y2="6" transform={`rotate(${index * 30} 120 120)`} className="timer-tick" />)}
+              {Array.from({ length: 12 }, (_, index) => (
+                <line
+                  key={index}
+                  x1="120"
+                  y1="2"
+                  x2="120"
+                  y2="6"
+                  transform={`rotate(${index * 30} 120 120)`}
+                  className="timer-tick"
+                />
+              ))}
               <circle cx="120" cy="120" r="110" className="timer-track" />
               <circle
                 cx="120"
@@ -88,10 +112,23 @@ export function TimerScreen() {
                   2 * Math.PI * 110 * (1 - remaining / draft.targetMs)
                 }
               />
-              <circle className="timer-progress-tip" r="3.5" cx={120 + 110 * Math.cos(2 * Math.PI * remaining / draft.targetMs)} cy={120 + 110 * Math.sin(2 * Math.PI * remaining / draft.targetMs)} />
+              <circle
+                className="timer-progress-tip"
+                r="3.5"
+                cx={
+                  120 +
+                  110 * Math.cos((2 * Math.PI * remaining) / draft.targetMs)
+                }
+                cy={
+                  120 +
+                  110 * Math.sin((2 * Math.PI * remaining) / draft.targetMs)
+                }
+              />
             </svg>
             <div className="timer-digits">
-              <span className="timer-dial-emoji" aria-hidden="true">{meditationEmoji(draft.typeName)}</span>
+              <span className="timer-dial-emoji" aria-hidden="true">
+                {meditationEmoji(draft.typeName)}
+              </span>
               <span role="timer" aria-live="off" aria-label="Time remaining">
                 {countdownLabel(remaining)}
               </span>
@@ -148,7 +185,9 @@ export function TimerScreen() {
         </section>
       ) : (
         <section className="paper timer-review">
-          <div className="timer-emblem" aria-hidden="true">{meditationEmoji(draft.typeName)}</div>
+          <div className="timer-emblem" aria-hidden="true">
+            {meditationEmoji(draft.typeName)}
+          </div>
           <p className="eyebrow">
             {draft.completed ? 'A PRACTICE, COMPLETED' : 'EVERY MOMENT COUNTS'}
           </p>
@@ -158,7 +197,12 @@ export function TimerScreen() {
           <dl className="timer-summary">
             <div>
               <dt>Practice</dt>
-              <dd><span aria-hidden="true">{meditationEmoji(draft.typeName)} </span>{draft.typeName}</dd>
+              <dd>
+                <span aria-hidden="true">
+                  {meditationEmoji(draft.typeName)}{' '}
+                </span>
+                {draft.typeName}
+              </dd>
             </div>
             <div>
               <dt>Time meditating</dt>
@@ -311,11 +355,25 @@ function TimerSetup() {
   }
   return (
     <form className="paper timer-setup" method="post" onSubmit={submit}>
-      <div className="timer-setup-heading"><div className="timer-emblem" aria-hidden="true">{meditationEmoji(query.data.find((type) => String(type.id) === selectedType)?.name ?? '')}</div><p className="eyebrow">YOUR MOMENT OF QUIET</p></div>
+      <div className="timer-setup-heading">
+        <div className="timer-emblem" aria-hidden="true">
+          {meditationEmoji(
+            query.data.find((type) => String(type.id) === selectedType)?.name ??
+              '',
+          )}
+        </div>
+        <p className="eyebrow">YOUR MOMENT OF QUIET</p>
+      </div>
       <label className="field" htmlFor="timer-type">
         <span>Meditation type</span>
       </label>
-      <select id="timer-type" name="meditation_type" value={selectedType} onChange={(event) => setSelectedType(event.target.value)} required>
+      <select
+        id="timer-type"
+        name="meditation_type"
+        value={selectedType}
+        onChange={(event) => setSelectedType(event.target.value)}
+        required
+      >
         <option value="" disabled>
           Choose your practice
         </option>
