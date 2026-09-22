@@ -1,197 +1,98 @@
-Welcome to your new TanStack Start app!
+# Shunyata frontend
 
-# Getting Started
+A small meditation journal built with TanStack Start, Router, Query, React, TypeScript, and Tailwind. Warm paper, muted sage, and quiet typography keep the focus on your practice.
 
-To run this application:
+## Run locally
+
+Use Node.js 22.12+ (or a newer supported LTS release) and npm. From this directory:
 
 ```bash
-npm install
+npm ci
+cp .env.example .env
+openssl rand -base64 32
+```
+
+Paste the generated value into `SESSION_SECRET` in `.env`, then run:
+
+```bash
 npm run dev
 ```
 
-# Building For Production
+Open <http://localhost:3000>. If `.env` already exists, preserve it instead of copying over it.
 
-To build this application for production:
+| Variable          | Purpose                                                                                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `BACKEND_API_URL` | Server-side Django API base URL, including `/api`; defaults to `http://127.0.0.1:8000/api`.                                   |
+| `SESSION_SECRET`  | Required secret of at least 32 characters for encrypting the authentication cookie. Use a separate value in each environment. |
+
+Start Django using the instructions in [the backend README](../backend/README.md). Set Django's `FRONTEND_URL` to the frontend origin, usually `http://localhost:3000`. For development verification emails, use Django's console email backend. Apply the existing Django migrations to populate meditation types; types can also be managed through Django admin.
+
+The browser talks to TanStack Start on its own origin. Start calls Django server-to-server, so this frontend does not require a browser CORS exception. Keep backend and session configuration server-only; do not prefix secrets with `VITE_`.
+
+## Features
+
+- Register with a username, email, password, and confirmation; verify email before signing in.
+- Follow the backend's existing `/api/auth/verify-email/<token>` link. Opening or prefetching the page does not consume the token; the verification button does.
+- Sign in with a username and password, maintain access through JWT refresh, and sign out.
+- Begin a countdown with pause/resume, an optional gentle completion bell, and review-before-save.
+- Log a session manually with its meditation type, start time, duration, completion status, and optional reflection.
+- Review your own sessions grouped by local date, newest first; edit entries or delete them after confirmation.
+- Use the journal on mobile or desktop, with keyboard navigation, accessible form errors, and loading/empty/error states.
+
+Dates are entered and displayed in the browser's local timezone. The frontend sends ISO timestamps to Django and preserves duration precision when editing. Manual entries derive their end time from start plus duration. Timer entries keep their real finish time and active duration separately, excluding pauses. Editing only notes, type, or completion status preserves that finish time; editing start or duration recalculates it. Durations must be positive and no longer than one year. History currently uses the backend's unpaginated list.
+
+## Meditation timer
+
+Open **Timer** or **Begin a session**, choose a meditation type, then select a preset or enter 1–180 whole minutes. The default is 10 minutes with a gentle completion bell enabled. Start when ready; pause/resume or finish early at any time.
+
+At the end, add an optional reflection and save or discard the session. Natural completion is marked completed; finishing early is unfinished. Sessions shorter than one second cannot be saved. Saving never retries automatically; errors keep the review and reflection available. If a connection drops while saving, check your journal before retrying because the server may have received the first request.
+
+The timer continues across app navigation, with a return indicator in the journal. A validated snapshot in `sessionStorage` restores the timer and reflection after refreshing the same tab. Pauses remain paused; overdue countdowns restore directly to review, using their calculated finish time rather than the time you returned. Snapshots are bound to an opaque login scope and discarded when signing out or changing login sessions. No JWTs are stored in browser storage. If storage is blocked, the app explains that it can only retain the timer in memory.
+
+The completion bell is one synthesized, quiet tone, with a mute control. After refreshing, your browser may require you to click **Enable bell**. A missed bell is not replayed for an already completed session. Sound is optional and cannot prevent saving. Browser or device suspension may delay audio and UI updates; this is not a reliable background alarm. Cross-tab/device synchronization and recovery after signing out are not supported.
+
+## Architecture
+
+File-based routes and a protected layout live in `src/routes`. `src/server/functions.ts` provides the typed server-function boundary; Django remains the authority for account and record permissions. `src/server/transport.ts` normalizes API errors and retries an unauthorized request once after refreshing the access token. Network failures do not automatically repeat writes.
+
+JWTs live in an encrypted HTTP-only, SameSite=Lax cookie, marked Secure in production. They are not exposed in localStorage or page hydration. Start CSRF middleware protects server-function requests. Private responses are not publicly cacheable. The local cookie lasts up to one day; Django still enforces token expiry. Signing out clears the local cookie and query cache; the backend currently has no token revocation endpoint.
+
+TanStack Query uses a separate QueryClient for each router/server request, preloads through route loaders, and invalidates journal data after successful mutations. Browser-local date rendering waits for hydration to avoid server timezone mismatches. Validation uses Zod at the server-function boundary.
+
+## Checks
 
 ```bash
+npm run typecheck
+npm test
+npx playwright install chromium --only-shell
+npm run test:e2e
+npm run format:check
 npm run build
 ```
 
-## Styling
+Unit tests cover duration and timestamp handling, timer state and recovery, optional audio, validation, error mapping, and token refresh/expiry. Browser tests start a deterministic Django-contract fixture on port 8100 and the frontend on port 3100; those ports must be free. They cover account flows, journal CRUD, session isolation, failure states, mobile layouts, and clock-controlled timer completion, recovery, pause/resume, and saving. No real accounts or emails are used. Screenshots and failure traces are written under the ignored `test-results/` directory.
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+`npm run format` formats the frontend; generated routes and build/test artifacts are excluded.
 
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
-
-
-## Deploy with Nitro
-
-This project uses Nitro as a generic server adapter, so it can run on any Node-compatible host.
+## Production
 
 ```bash
 npm run build
-node dist/server/index.mjs
+node .output/server/index.mjs
 ```
 
-The build output is a self-contained Node server. To deploy, push the `dist/` directory to your host (Render, Fly.io, your own VPS, etc.) and run the server command above.
+Deploy the full `.output/` directory to a Node-compatible server. Set `BACKEND_API_URL` and `SESSION_SECRET` in its environment, configure Django's `FRONTEND_URL` to the public frontend origin, and serve the frontend over HTTPS so Secure cookies work. Keep the same secret across frontend instances. Do not publicly cache authenticated pages or server-function responses. This is a server-rendered app, not a static-only deployment.
 
-For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
+## Pending features
 
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+- [x] Countdown timer, pause/resume, and optional completion bell.
+- [ ] Open-ended stopwatch mode and interval bells.
+- [ ] Reliable background notifications and cross-device timer synchronization.
+- [ ] History search, filters, and server-side pagination.
+- [ ] Progress charts, streaks, and goals.
+- [ ] Password reset and verification-email resend — backend endpoints needed.
+- [ ] Profile/account settings — backend endpoints needed.
+- [ ] Server-side logout/token revocation — backend support needed.
+- [ ] Reminders and notification preferences.
+- [ ] Offline/PWA support and data export.
+- [ ] Dark theme and localization.

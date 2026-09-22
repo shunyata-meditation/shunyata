@@ -9,51 +9,216 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedTimerRouteImport } from './routes/_authed/timer'
+import { Route as AuthedSessionsNewRouteImport } from './routes/_authed/sessions.new'
+import { Route as AuthedSessionsSessionIdEditRouteImport } from './routes/_authed/sessions.$sessionId.edit'
+import { Route as ApiAuthVerifyEmailTokenRouteImport } from './routes/api.auth.verify-email.$token'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedTimerRoute = AuthedTimerRouteImport.update({
+  id: '/timer',
+  path: '/timer',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSessionsNewRoute = AuthedSessionsNewRouteImport.update({
+  id: '/sessions/new',
+  path: '/sessions/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSessionsSessionIdEditRoute =
+  AuthedSessionsSessionIdEditRouteImport.update({
+    id: '/sessions/$sessionId/edit',
+    path: '/sessions/$sessionId/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const ApiAuthVerifyEmailTokenRoute = ApiAuthVerifyEmailTokenRouteImport.update({
+  id: '/api/auth/verify-email/$token',
+  path: '/api/auth/verify-email/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthedIndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/timer': typeof AuthedTimerRoute
+  '/sessions/new': typeof AuthedSessionsNewRoute
+  '/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
+  '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/timer': typeof AuthedTimerRoute
+  '/': typeof AuthedIndexRoute
+  '/sessions/new': typeof AuthedSessionsNewRoute
+  '/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
+  '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/_authed/timer': typeof AuthedTimerRoute
+  '/_authed/': typeof AuthedIndexRoute
+  '/_authed/sessions/new': typeof AuthedSessionsNewRoute
+  '/_authed/sessions/$sessionId/edit': typeof AuthedSessionsSessionIdEditRoute
+  '/api/auth/verify-email/$token': typeof ApiAuthVerifyEmailTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/timer'
+    | '/sessions/new'
+    | '/sessions/$sessionId/edit'
+    | '/api/auth/verify-email/$token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/login'
+    | '/register'
+    | '/timer'
+    | '/'
+    | '/sessions/new'
+    | '/sessions/$sessionId/edit'
+    | '/api/auth/verify-email/$token'
+  id:
+    | '__root__'
+    | '/_authed'
+    | '/login'
+    | '/register'
+    | '/_authed/timer'
+    | '/_authed/'
+    | '/_authed/sessions/new'
+    | '/_authed/sessions/$sessionId/edit'
+    | '/api/auth/verify-email/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  ApiAuthVerifyEmailTokenRoute: typeof ApiAuthVerifyEmailTokenRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/': {
+      id: '/_authed/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/timer': {
+      id: '/_authed/timer'
+      path: '/timer'
+      fullPath: '/timer'
+      preLoaderRoute: typeof AuthedTimerRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/sessions/new': {
+      id: '/_authed/sessions/new'
+      path: '/sessions/new'
+      fullPath: '/sessions/new'
+      preLoaderRoute: typeof AuthedSessionsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/sessions/$sessionId/edit': {
+      id: '/_authed/sessions/$sessionId/edit'
+      path: '/sessions/$sessionId/edit'
+      fullPath: '/sessions/$sessionId/edit'
+      preLoaderRoute: typeof AuthedSessionsSessionIdEditRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/api/auth/verify-email/$token': {
+      id: '/api/auth/verify-email/$token'
+      path: '/api/auth/verify-email/$token'
+      fullPath: '/api/auth/verify-email/$token'
+      preLoaderRoute: typeof ApiAuthVerifyEmailTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedTimerRoute: typeof AuthedTimerRoute
+  AuthedIndexRoute: typeof AuthedIndexRoute
+  AuthedSessionsNewRoute: typeof AuthedSessionsNewRoute
+  AuthedSessionsSessionIdEditRoute: typeof AuthedSessionsSessionIdEditRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedTimerRoute: AuthedTimerRoute,
+  AuthedIndexRoute: AuthedIndexRoute,
+  AuthedSessionsNewRoute: AuthedSessionsNewRoute,
+  AuthedSessionsSessionIdEditRoute: AuthedSessionsSessionIdEditRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  ApiAuthVerifyEmailTokenRoute: ApiAuthVerifyEmailTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

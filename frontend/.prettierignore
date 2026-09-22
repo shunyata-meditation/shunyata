@@ -1,0 +1,9 @@
+node_modules
+.output
+.nitro
+.tanstack
+src/routeTree.gen.ts
+package-lock.json
+playwright-report
+test-results
+.cta.json
