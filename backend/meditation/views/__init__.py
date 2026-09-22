@@ -3,12 +3,17 @@ from meditation.views.auth import (
     UserRegistrationView,
     VerifyEmailView,
 )
-from meditation.views.sessions import MeditationSessionViewSet, MeditationTypeViewSet
+from meditation.views.sessions import (
+    MeditationSessionViewSet,
+    MeditationTypeViewSet,
+    PracticeGoalView,
+)
 
 __all__ = [
     "CaseInsensitiveTokenObtainPairView",
     "MeditationSessionViewSet",
     "MeditationTypeViewSet",
+    "PracticeGoalView",
     "UserRegistrationView",
     "VerifyEmailView",
 ]

@@ -5,7 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from meditation.models import MeditationSession, MeditationType
+from meditation.models import MeditationSession, MeditationType, PracticeGoal
 
 
 class MeditationTypeSerializer(serializers.ModelSerializer):
@@ -45,6 +45,12 @@ class MeditationSessionSerializer(serializers.ModelSerializer):
     meditation_type_name = serializers.CharField(
         source="meditation_type.name", read_only=True
     )
+
+
+class PracticeGoalSerializer(serializers.ModelSerializer):
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = PracticeGoal
+        fields: ClassVar[list[str]] = ["weekly_minutes"]
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

@@ -8,7 +8,12 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from meditation.models import EmailVerificationToken, MeditationSession, MeditationType
+from meditation.models import (
+    EmailVerificationToken,
+    MeditationSession,
+    MeditationType,
+    PracticeGoal,
+)
 
 
 class MeditationSessionViewSetTest(APITestCase):
@@ -195,6 +200,63 @@ class MeditationSessionViewSetTest(APITestCase):
                 {item["name"] for item in response.data}
             )
         )
+
+
+class PracticeGoalViewTest(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="goaluser", email="goal@example.com", password="testpass123"
+        )
+        self.other_user = User.objects.create_user(
+            username="othergoal", email="othergoal@example.com", password="testpass123"
+        )
+        self.url = reverse("practice-goal")
+
+    def test_goal_requires_authentication(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_without_goal_returns_null(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"weekly_minutes": None})
+
+    def test_create_update_and_delete_goal(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.put(
+            self.url, {"weekly_minutes": 75}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {"weekly_minutes": 75})
+
+        response = self.client.put(
+            self.url, {"weekly_minutes": 90}, format="json"
+        )
+        self.assertEqual(response.data, {"weekly_minutes": 90})
+        self.assertEqual(PracticeGoal.objects.get(user=self.user).weekly_minutes, 90)
+
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(PracticeGoal.objects.filter(user=self.user).exists())
+
+    def test_invalid_goal_does_not_create_a_record(self):
+        self.client.force_authenticate(user=self.user)
+        for value in (0, 10_081):
+            response = self.client.put(
+                self.url, {"weekly_minutes": value}, format="json"
+            )
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(PracticeGoal.objects.filter(user=self.user).exists())
+
+    def test_goal_is_isolated_by_user(self):
+        PracticeGoal.objects.create(user=self.other_user, weekly_minutes=120)
+        self.client.force_authenticate(user=self.user)
+        self.client.put(self.url, {"weekly_minutes": 45}, format="json")
+        self.assertEqual(
+            PracticeGoal.objects.get(user=self.other_user).weekly_minutes, 120
+        )
+        self.assertEqual(self.client.get(self.url).data, {"weekly_minutes": 45})
 
 
 @override_settings(

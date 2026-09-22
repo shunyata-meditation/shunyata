@@ -4,7 +4,12 @@ from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from meditation.models import EmailVerificationToken, MeditationSession, MeditationType
+from meditation.models import (
+    EmailVerificationToken,
+    MeditationSession,
+    MeditationType,
+    PracticeGoal,
+)
 
 
 class MeditationSessionModelTest(TestCase):
@@ -91,6 +96,12 @@ class MeditationSessionModelTest(TestCase):
         )
 
         self.assertEqual(session.notes, "")
+
+    def test_practice_goal_is_deleted_with_user(self):
+        goal = PracticeGoal.objects.create(user=self.user, weekly_minutes=60)
+        goal_id = goal.pk
+        self.user.delete()
+        self.assertFalse(PracticeGoal.objects.filter(pk=goal_id).exists())
 
 
 @override_settings(VERIFICATION_EMAIL_EXPIRY_HOURS=24)

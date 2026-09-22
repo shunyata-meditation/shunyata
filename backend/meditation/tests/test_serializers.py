@@ -8,6 +8,7 @@ from meditation.models import MeditationSession, MeditationType
 from meditation.serializers import (
     MeditationSessionSerializer,
     MeditationTypeSerializer,
+    PracticeGoalSerializer,
     UserRegistrationSerializer,
 )
 
@@ -104,6 +105,14 @@ class MeditationSessionSerializerTest(TestCase):
         serializer = MeditationTypeSerializer(self.mindfulness)
 
         self.assertEqual(serializer.data, {"id": self.mindfulness.pk, "name": "Mindfulness"})
+
+    def test_practice_goal_serializer_validates_limits(self):
+        self.assertTrue(
+            PracticeGoalSerializer(data={"weekly_minutes": 60}).is_valid()
+        )
+        for value in (0, 10_081):
+            serializer = PracticeGoalSerializer(data={"weekly_minutes": value})
+            self.assertFalse(serializer.is_valid())
 
 
 class UserRegistrationSerializerTest(TestCase):

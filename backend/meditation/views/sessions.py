@@ -1,7 +1,13 @@
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, status, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from meditation.models import MeditationSession, MeditationType
-from meditation.serializers import MeditationSessionSerializer, MeditationTypeSerializer
+from meditation.models import MeditationSession, MeditationType, PracticeGoal
+from meditation.serializers import (
+    MeditationSessionSerializer,
+    MeditationTypeSerializer,
+    PracticeGoalSerializer,
+)
 
 
 class MeditationTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -21,3 +27,26 @@ class MeditationSessionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class PracticeGoalView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        goal = PracticeGoal.objects.filter(user=request.user).first()
+        return Response(
+            {"weekly_minutes": goal.weekly_minutes if goal is not None else None}
+        )
+
+    def put(self, request):
+        serializer = PracticeGoalSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        goal, _ = PracticeGoal.objects.update_or_create(
+            user=request.user,
+            defaults=serializer.validated_data,
+        )
+        return Response(PracticeGoalSerializer(goal).data)
+
+    def delete(self, request):
+        PracticeGoal.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

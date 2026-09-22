@@ -7,6 +7,7 @@ from meditation.views import (
     CaseInsensitiveTokenObtainPairView,
     MeditationSessionViewSet,
     MeditationTypeViewSet,
+    PracticeGoalView,
     UserRegistrationView,
     VerifyEmailView,
 )
@@ -29,6 +30,7 @@ urlpatterns = [
     ),
     path("auth/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("meditations/", include(router.urls)),
+    path("meditations/goal/", PracticeGoalView.as_view(), name="practice-goal"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "docs/",
