@@ -4,6 +4,6 @@ export const Route = createFileRoute('/register')({
   beforeLoad: ({ context }) => {
     if (context.auth.authenticated) throw redirect({ to: '/' })
   },
-  head: () => ({ meta: [{ title: 'Begin your journal — Shunyata' }] }),
+  head: () => ({ meta: [{ title: 'Begin your journal | Shunyata' }] }),
   component: () => <AuthForm mode="register" />,
 })

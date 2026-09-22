@@ -6,6 +6,6 @@ export const Route = createFileRoute('/_authed/timer')({
   loader: async ({ context }) => {
     await context.queryClient.prefetchQuery(typesQuery())
   },
-  head: () => ({ meta: [{ title: 'Meditation timer — Shunyata' }] }),
+  head: () => ({ meta: [{ title: 'Meditation timer | Shunyata' }] }),
   component: TimerScreen,
 })

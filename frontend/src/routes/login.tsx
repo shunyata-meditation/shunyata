@@ -4,6 +4,6 @@ export const Route = createFileRoute('/login')({
   beforeLoad: ({ context }) => {
     if (context.auth.authenticated) throw redirect({ to: '/' })
   },
-  head: () => ({ meta: [{ title: 'Sign in — Shunyata' }] }),
+  head: () => ({ meta: [{ title: 'Sign in | Shunyata' }] }),
   component: () => <AuthForm mode="login" />,
 })

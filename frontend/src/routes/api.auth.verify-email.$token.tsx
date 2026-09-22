@@ -7,7 +7,7 @@ import type { ApiProblem } from '../lib/contracts'
 export const Route = createFileRoute('/api/auth/verify-email/$token')({
   head: () => ({
     meta: [
-      { title: 'Verify your email — Shunyata' },
+      { title: 'Verify your email | Shunyata' },
       { name: 'referrer', content: 'no-referrer' },
     ],
   }),

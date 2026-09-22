@@ -90,9 +90,9 @@ Deploy the full `.output/` directory to a Node-compatible server. Set `BACKEND_A
 - [ ] Reliable background notifications and cross-device timer synchronization.
 - [ ] History search, filters, and server-side pagination.
 - [ ] Progress charts, streaks, and goals.
-- [ ] Password reset and verification-email resend — backend endpoints needed.
-- [ ] Profile/account settings — backend endpoints needed.
-- [ ] Server-side logout/token revocation — backend support needed.
+- [ ] Password reset and verification-email resend (backend endpoints needed).
+- [ ] Profile/account settings (backend endpoints needed).
+- [ ] Server-side logout/token revocation (backend support needed).
 - [ ] Reminders and notification preferences.
 - [ ] Offline/PWA support and data export.
 - [ ] Dark theme and localization.

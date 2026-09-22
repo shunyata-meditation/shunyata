@@ -29,7 +29,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { title: 'Shunyata — a space for your practice' },
+        { title: 'Shunyata | A space for your practice' },
         {
           name: 'description',
           content:

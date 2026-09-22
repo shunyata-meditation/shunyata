@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_authed/sessions/$sessionId/edit')({
       context.queryClient.prefetchQuery(typesQuery()),
     ])
   },
-  head: () => ({ meta: [{ title: 'Edit your session — Shunyata' }] }),
+  head: () => ({ meta: [{ title: 'Edit your session | Shunyata' }] }),
   component: () => {
     const { sessionId } = Route.useParams()
     return <SessionPage id={Number(sessionId)} />

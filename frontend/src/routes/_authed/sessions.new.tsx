@@ -5,6 +5,6 @@ export const Route = createFileRoute('/_authed/sessions/new')({
   loader: async ({ context }) => {
     await context.queryClient.prefetchQuery(typesQuery())
   },
-  head: () => ({ meta: [{ title: 'Log a session — Shunyata' }] }),
+  head: () => ({ meta: [{ title: 'Log a session | Shunyata' }] }),
   component: () => <SessionPage />,
 })
