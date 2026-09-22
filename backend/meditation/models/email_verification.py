@@ -37,3 +37,20 @@ class EmailVerificationToken(models.Model):
             },
         )
         return verification_token
+
+
+class RecoveryEmailEvent(models.Model):
+    class Kind(models.TextChoices):
+        PASSWORD_RESET = "password_reset", "Password reset"
+        VERIFICATION = "verification", "Verification"
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="recovery_email_events",
+    )
+    kind = models.CharField(max_length=32, choices=Kind.choices)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "kind", "sent_at"])]

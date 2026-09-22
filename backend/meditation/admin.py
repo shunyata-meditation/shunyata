@@ -7,6 +7,7 @@ from meditation.models import (
     MeditationSession,
     MeditationType,
     PracticeGoal,
+    RecoveryEmailEvent,
 )
 
 
@@ -49,3 +50,10 @@ class EmailVerificationTokenAdmin(admin.ModelAdmin):
     list_filter: ClassVar[list[str]] = ["created_at", "user"]
     search_fields: ClassVar[list[str]] = ["user__username", "user__email"]
     date_hierarchy = "created_at"
+
+
+@admin.register(RecoveryEmailEvent)
+class RecoveryEmailEventAdmin(admin.ModelAdmin):
+    list_display: ClassVar[list[str]] = ["id", "user", "kind", "sent_at"]
+    list_filter: ClassVar[list[str]] = ["kind", "sent_at"]
+    date_hierarchy = "sent_at"

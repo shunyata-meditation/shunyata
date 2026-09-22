@@ -7,7 +7,12 @@ from meditation.views import (
     CaseInsensitiveTokenObtainPairView,
     MeditationSessionViewSet,
     MeditationTypeViewSet,
+    PasswordChangeView,
+    PasswordResetConfirmView,
+    PasswordResetRequestView,
     PracticeGoalView,
+    ProfileView,
+    ResendVerificationView,
     UserRegistrationView,
     VerifyEmailView,
 )
@@ -18,6 +23,27 @@ router.register("types", MeditationTypeViewSet, basename="meditation-type")
 
 urlpatterns = [
     path("auth/register/", UserRegistrationView.as_view(), name="register"),
+    path(
+        "auth/resend-verification/",
+        ResendVerificationView.as_view(),
+        name="resend-verification",
+    ),
+    path(
+        "auth/password-reset/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset-request",
+    ),
+    path(
+        "auth/password-reset/<str:uid>/<str:token>/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
+    path("auth/profile/", ProfileView.as_view(), name="profile"),
+    path(
+        "auth/password-change/",
+        PasswordChangeView.as_view(),
+        name="password-change",
+    ),
     path(
         "auth/verify-email/<str:token>/",
         VerifyEmailView.as_view(),

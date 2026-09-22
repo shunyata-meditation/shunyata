@@ -26,6 +26,53 @@ class CaseInsensitiveTokenObtainPairSerializer(TokenObtainPairSerializer):
         return super().validate(attrs)
 
 
+class AccountEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class PasswordPairSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+    password_confirm = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError(
+                {"password_confirm": "Password fields didn't match."}
+            )
+        validate_password(attrs["new_password"], self.context.get("user"))
+        return attrs
+
+
+class PasswordChangeSerializer(PasswordPairSerializer):
+    current_password = serializers.CharField(
+        write_only=True, style={"input_type": "password"}
+    )
+
+    def validate(self, attrs):
+        user = self.context["user"]
+        if not user.check_password(attrs["current_password"]):
+            raise serializers.ValidationError(
+                {"current_password": "Your current password is incorrect."}
+            )
+        attrs = super().validate(attrs)
+        if user.check_password(attrs["new_password"]):
+            raise serializers.ValidationError(
+                {"new_password": "Choose a password you haven't just used."}
+            )
+        return attrs
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
+        model = User
+        fields: ClassVar[list[str]] = ["username", "email"]
+        read_only_fields: ClassVar[list[str]] = ["username", "email"]
+
+
 class MeditationSessionSerializer(serializers.ModelSerializer):
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = MeditationSession

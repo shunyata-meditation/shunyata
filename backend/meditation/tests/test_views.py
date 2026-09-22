@@ -1,10 +1,13 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
@@ -13,6 +16,7 @@ from meditation.models import (
     MeditationSession,
     MeditationType,
     PracticeGoal,
+    RecoveryEmailEvent,
 )
 
 
@@ -450,7 +454,7 @@ class VerifyEmailViewTest(APITestCase):
         self.assertIn("error", response.data)
         self.assertIn("expired", response.data["error"].lower())
 
-        self.assertFalse(User.objects.filter(username="testuser").exists())
+        self.assertTrue(User.objects.filter(username="testuser").exists())
         self.assertFalse(
             EmailVerificationToken.objects.filter(token=token.token).exists()
         )
@@ -465,4 +469,165 @@ class VerifyEmailViewTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertFalse(
             EmailVerificationToken.objects.filter(token=token_value).exists()
+        )
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    FRONTEND_URL="http://localhost:3000",
+    PASSWORD_RESET_TIMEOUT=3600,
+)
+class AccountRecoveryViewTest(APITestCase):
+    def setUp(self):
+        self.active = User.objects.create_user(
+            username="activeuser",
+            email="active@example.com",
+            password="OldSecurePass123!",
+        )
+        self.inactive = User.objects.create_user(
+            username="inactiveuser",
+            email="inactive@example.com",
+            password="OldSecurePass123!",
+            is_active=False,
+        )
+
+    def reset_link(self):
+        uid = urlsafe_base64_encode(force_bytes(self.active.pk))
+        token = default_token_generator.make_token(self.active)
+        return uid, token
+
+    def test_password_reset_request_is_generic_and_active_only(self):
+        url = reverse("password-reset-request")
+        for email in ("unknown@example.com", self.inactive.email):
+            response = self.client.post(url, {"email": email}, format="json")
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 0)
+
+        response = self.client.post(
+            url, {"email": "ACTIVE@example.com"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/reset-password/", mail.outbox[0].body)
+
+    def test_recovery_email_limit_is_five_per_hour(self):
+        url = reverse("password-reset-request")
+        for _ in range(6):
+            response = self.client.post(
+                url, {"email": self.active.email}, format="json"
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 5)
+        self.assertEqual(
+            RecoveryEmailEvent.objects.filter(
+                user=self.active,
+                kind=RecoveryEmailEvent.Kind.PASSWORD_RESET,
+            ).count(),
+            5,
+        )
+
+    def test_reset_link_validation_password_rules_and_single_use(self):
+        uid, token = self.reset_link()
+        url = reverse(
+            "password-reset-confirm", kwargs={"uid": uid, "token": token}
+        )
+        self.assertEqual(self.client.get(url).status_code, status.HTTP_200_OK)
+        weak = self.client.post(
+            url,
+            {"new_password": "123", "password_confirm": "123"},
+            format="json",
+        )
+        self.assertEqual(weak.status_code, status.HTTP_400_BAD_REQUEST)
+
+        response = self.client.post(
+            url,
+            {
+                "new_password": "NewSecurePass456!",
+                "password_confirm": "NewSecurePass456!",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.active.refresh_from_db()
+        self.assertTrue(self.active.check_password("NewSecurePass456!"))
+        self.assertEqual(self.client.get(url).status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_invalid_and_expired_reset_links_are_rejected(self):
+        uid, token = self.reset_link()
+        invalid = reverse(
+            "password-reset-confirm", kwargs={"uid": uid, "token": f"{token}x"}
+        )
+        self.assertEqual(self.client.get(invalid).status_code, status.HTTP_400_BAD_REQUEST)
+        with override_settings(PASSWORD_RESET_TIMEOUT=-1):
+            expired = reverse(
+                "password-reset-confirm", kwargs={"uid": uid, "token": token}
+            )
+            self.assertEqual(
+                self.client.get(expired).status_code, status.HTTP_400_BAD_REQUEST
+            )
+
+    def test_resend_is_generic_reuses_token_and_keeps_inactive_user(self):
+        token = EmailVerificationToken.create_token(self.inactive)
+        url = reverse("resend-verification")
+        response = self.client.post(
+            url, {"email": "INACTIVE@example.com"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(mail.outbox), 1)
+        token.refresh_from_db()
+        self.assertIn(token.token, mail.outbox[0].body)
+
+        self.client.post(url, {"email": self.active.email}, format="json")
+        self.client.post(url, {"email": "unknown@example.com"}, format="json")
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_profile_and_password_change(self):
+        self.client.force_authenticate(user=self.active)
+        profile = self.client.get(reverse("profile"))
+        self.assertEqual(
+            profile.data,
+            {"username": "activeuser", "email": "active@example.com"},
+        )
+        wrong = self.client.post(
+            reverse("password-change"),
+            {
+                "current_password": "wrong",
+                "new_password": "NewSecurePass456!",
+                "password_confirm": "NewSecurePass456!",
+            },
+            format="json",
+        )
+        self.assertEqual(wrong.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.post(
+            reverse("password-change"),
+            {
+                "current_password": "OldSecurePass123!",
+                "new_password": "NewSecurePass456!",
+                "password_confirm": "NewSecurePass456!",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_password_change_revokes_existing_jwt(self):
+        login = self.client.post(
+            reverse("token_obtain_pair"),
+            {"username": self.active.username, "password": "OldSecurePass123!"},
+            format="json",
+        )
+        access = login.data["access"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
+        response = self.client.post(
+            reverse("password-change"),
+            {
+                "current_password": "OldSecurePass123!",
+                "new_password": "NewSecurePass456!",
+                "password_confirm": "NewSecurePass456!",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            self.client.get(reverse("profile")).status_code,
+            status.HTTP_401_UNAUTHORIZED,
         )
