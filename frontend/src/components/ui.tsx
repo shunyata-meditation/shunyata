@@ -4,9 +4,13 @@ import type { ApiProblem } from '../lib/contracts'
 import shunyataLogo from '../assets/shunyata_logo.svg'
 
 export function LogoMark({ small = false }: { small?: boolean }) {
+  // Explicit size keeps the viewBox-only SVG from filling the page before CSS applies
+  const size = small ? 44 : 72
   return (
     <img
       src={shunyataLogo}
+      width={size}
+      height={size}
       className={small ? 'logo-mark small' : 'logo-mark'}
       alt=""
       aria-hidden="true"
