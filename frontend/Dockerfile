@@ -13,10 +13,11 @@ RUN npm run build
 
 FROM node:${NODE_VERSION}-slim AS runtime
 
-# NITRO_* take precedence over HOST/PORT, so platform-injected PORT can't move the listener
+# Nitro listens on NITRO_PORT ?? PORT; leave NITRO_PORT unset so Railway's injected PORT wins.
+# PORT=3000 is only the fallback for running the image outside Railway.
 ENV NODE_ENV=production \
     NITRO_HOST=0.0.0.0 \
-    NITRO_PORT=3000
+    PORT=3000
 
 WORKDIR /app
 
