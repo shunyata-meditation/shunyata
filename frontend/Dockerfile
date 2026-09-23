@@ -1,18 +1,22 @@
-FROM node:latest AS build
+# syntax=docker/dockerfile:1
+ARG NODE_VERSION=24
+
+FROM node:${NODE_VERSION}-slim AS build
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY . .
 RUN npm run build
 
-FROM node:latest AS runtime
+FROM node:${NODE_VERSION}-slim AS runtime
 
+# NITRO_* take precedence over HOST/PORT, so platform-injected PORT can't move the listener
 ENV NODE_ENV=production \
-    HOST=127.0.0.1 \
-    PORT=3000
+    NITRO_HOST=0.0.0.0 \
+    NITRO_PORT=3000
 
 WORKDIR /app
 
