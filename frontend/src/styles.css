@@ -1,4 +1,6 @@
-@import 'tailwindcss';
+/* Scan only src/: without .gitignore (excluded from the Docker context) Tailwind also
+   scans the client build output, so the SSR build emits a different, missing CSS hash. */
+@import 'tailwindcss' source('.');
 
 :root {
   color-scheme: light;
