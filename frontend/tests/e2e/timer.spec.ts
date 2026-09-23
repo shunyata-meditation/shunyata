@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 
 async function signIn(page: Page, username = 'river') {
   await page.goto('/login')
-  await page.getByLabel('Username', { exact: true }).fill(username)
+  await page.getByLabel('Username or email').fill(username)
   await page.getByLabel('Password', { exact: true }).fill('correct-password')
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(

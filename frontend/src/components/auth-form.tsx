@@ -100,7 +100,7 @@ export function AuthForm({
     ? ['username', 'email', 'password', 'password_confirm']
     : ['username', 'password']
   const labels: Record<string, string> = {
-    username: 'Username',
+    username: isRegister ? 'Username' : 'Username or email',
     email: 'Email address',
     password: 'Password',
     password_confirm: 'Confirm password',

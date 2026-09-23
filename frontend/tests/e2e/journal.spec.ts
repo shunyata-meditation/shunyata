@@ -3,7 +3,7 @@ import type { Page } from '@playwright/test'
 
 async function signIn(page: Page, username = 'river') {
   await page.goto('/login')
-  await page.getByLabel('Username', { exact: true }).fill(username)
+  await page.getByLabel('Username or email').fill(username)
   await page.getByLabel('Password', { exact: true }).fill('correct-password')
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(
@@ -311,7 +311,7 @@ test('account recovery and profile password change complete securely', async ({
     page.getByRole('heading', { name: 'Your password is ready.' }),
   ).toBeVisible()
   await page.getByRole('link', { name: 'Continue to sign in' }).click()
-  await page.getByLabel('Username', { exact: true }).fill('river')
+  await page.getByLabel('Username or email').fill('river')
   await page.getByLabel('Password', { exact: true }).fill('reset-password')
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).toHaveURL(/\/$/)
@@ -340,7 +340,7 @@ test('account recovery and profile password change complete securely', async ({
       'Your password has been changed. Sign in again on this device.',
     ),
   ).toBeVisible()
-  await page.getByLabel('Username', { exact: true }).fill('river')
+  await page.getByLabel('Username or email').fill('river')
   await page.getByLabel('Password', { exact: true }).fill('profile-password')
   await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).toHaveURL(/\/$/)
@@ -351,7 +351,7 @@ test('invalid credentials show an error and cross-site login requests are reject
   request,
 }) => {
   await page.goto('/login')
-  await page.getByLabel('Username', { exact: true }).fill('river')
+  await page.getByLabel('Username or email').fill('river')
   await page.getByLabel('Password', { exact: true }).fill('wrong-password')
   const responsePromise = page.waitForResponse(
     (response) =>

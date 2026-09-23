@@ -404,6 +404,65 @@ class LoginViewTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_login_with_email(self):
+        response = self.client.post(
+            self.url,
+            {"username": "test@example.com", "password": "testpass123"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
+
+    def test_login_with_email_case_insensitive(self):
+        response = self.client.post(
+            self.url,
+            {"username": "TEST@Example.com", "password": "testpass123"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_with_email_wrong_password(self):
+        response = self.client.post(
+            self.url,
+            {"username": "test@example.com", "password": "wrongpassword"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_with_unknown_email(self):
+        response = self.client.post(
+            self.url,
+            {"username": "nobody@example.com", "password": "testpass123"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_username_takes_precedence_over_email(self):
+        User.objects.create_user(
+            username="test@example.com",
+            email="other@example.com",
+            password="otherpass123",
+        )
+
+        response = self.client.post(
+            self.url,
+            {"username": "test@example.com", "password": "otherpass123"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(
+            self.url,
+            {"username": "test@example.com", "password": "testpass123"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 @override_settings(
     VERIFICATION_EMAIL_EXPIRY_HOURS=24, FRONTEND_URL="http://localhost:3000"

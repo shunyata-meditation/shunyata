@@ -1,11 +1,12 @@
 import { z } from 'zod'
 
 export const loginSchema = z.object({
-  username: z.string().trim().min(1, 'Enter your username.'),
+  username: z.string().trim().min(1, 'Enter your username or email.'),
   password: z.string().min(1, 'Enter your password.'),
 })
 export const registerSchema = loginSchema
   .extend({
+    username: z.string().trim().min(1, 'Enter your username.'),
     email: z.email('Enter a valid email address.'),
     password_confirm: z.string().min(1, 'Confirm your password.'),
   })

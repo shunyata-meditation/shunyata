@@ -16,13 +16,16 @@ class MeditationTypeSerializer(serializers.ModelSerializer):
 
 class CaseInsensitiveTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        username = attrs.get(self.username_field)
-        if username:
-            try:
-                user = User.objects.get(username__iexact=username)
+        identifier = attrs.get(self.username_field)
+        if identifier:
+            # Usernames take precedence so a username containing "@" still wins
+            user = User.objects.filter(username__iexact=identifier).first()
+            if user is None and "@" in identifier:
+                matches = list(User.objects.filter(email__iexact=identifier)[:2])
+                if len(matches) == 1:
+                    user = matches[0]
+            if user is not None:
                 attrs[self.username_field] = user.username
-            except User.DoesNotExist:
-                pass
         return super().validate(attrs)
 
 
